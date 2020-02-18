@@ -1,6 +1,7 @@
 ﻿using NetworkSocket;
 using NetworkSocket.Http;
 using ProxyFramework.Http.Filter;
+using ProxyFramework.Logger;
 using System;
 using System.Net;
 using System.Threading;

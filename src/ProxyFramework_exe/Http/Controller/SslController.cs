@@ -1,4 +1,5 @@
 ﻿using NetworkSocket.Http;
+using ProxyFramework.Logger;
 using ProxyFramework.Utils;
 using System;
 using System.IO;
@@ -64,7 +65,7 @@ namespace ProxyFramework.Http.Controller
             try
             {
                 HttpAction aciton = this.CurrentContext.Action;
-                string file = Path.Combine("Pages", "Index.html");
+                string file = Path.Combine("Http", "Pages", "Index.html");
                 string html = System.IO.File.ReadAllText(file, Encoding.UTF8);
                 return Content(html);
             }
