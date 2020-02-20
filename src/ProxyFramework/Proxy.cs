@@ -1,4 +1,5 @@
 ﻿using ProxyFramework.Http;
+using ProxyFramework.Models;
 using ProxyFramework.Utils;
 using System;
 using System.Collections.Generic;
@@ -22,6 +23,7 @@ namespace ProxyFramework
         private ExplicitProxyEndPoint explicitEndPoint = null;
         private HttpService httpService = new HttpService();
         private uint _port = 9527;
+        public uint _httpPort = 6066;
 
         /// <summary>
         /// 
@@ -62,35 +64,26 @@ namespace ProxyFramework
             Container.Add(proxy);
         }
 
-        void Info()
+        public ProxyInfo Info()
         {
-            string strHostName = Dns.GetHostName();
-            IPHostEntry ipEntry = Dns.GetHostEntry(strHostName); //取得本机IP
-            Log.Info($"代理端口：{_port}");
-            StringBuilder ipListBuilder = new StringBuilder();
-            ipListBuilder.Append("本机IP v4列表：");
+            ProxyInfo info = new ProxyInfo()
+            {
+                IpAddress = new List<string>(),
+                Port = _port,
+                HttpPort = _httpPort,
+                State = proxyServer.ProxyRunning,
+            };
+            IPHostEntry ipEntry = Dns.GetHostEntry(Dns.GetHostName()); //取得本机IP
             for (int i = 0; i < ipEntry.AddressList.Length; i++)
             {
                 if (ipEntry.AddressList[i].ToString().IndexOf('.') > 0)
                 {
-                    if (i == ipEntry.AddressList.Length - 1)
-                        ipListBuilder.Append(ipEntry.AddressList[i].ToString());
-                    else
-                        ipListBuilder.Append(ipEntry.AddressList[i].ToString() + "，");
+                    info.IpAddress.Add(ipEntry.AddressList[i].ToString());
                 }
             }
-            Log.Info(ipListBuilder.ToString());
-            Log.Info($"请先修改WIFI代理。点击手机连接的WIFI，设置代理主机为电脑IP地址，端口为{_port}。");
-
-            if (RunTime.IsWindows)
-            {
-                // fix console hang due to QuickEdit mode
-                ConsoleHelper.DisableQuickEditMode();
-            }
-            Console.CancelKeyPress += (object sender, ConsoleCancelEventArgs eventArgs) =>
-            {
-                Stop();
-            };
+            //Log.Info(ipListBuilder.ToString());
+            //Log.Info($"请先修改WIFI代理。点击手机连接的WIFI，设置代理主机为电脑IP地址，端口为{_port}。");
+            return info;
         }
 
         public bool Start()
@@ -122,7 +115,7 @@ namespace ProxyFramework
 
                 explicitEndPoint = new ExplicitProxyEndPoint(IPAddress.Any, (int)_port, true);
                 // Fired when a CONNECT request is received
-                explicitEndPoint.BeforeTunnelConnectRequest += OnBeforeTunnelConnectRequest;
+                //explicitEndPoint.BeforeTunnelConnectRequest += OnBeforeTunnelConnectRequest;
 
                 // An explicit endpoint is where the client knows about the existence of a proxy
                 // So client sends request in a proxy friendly manner
@@ -160,7 +153,7 @@ namespace ProxyFramework
             }
             if (explicitEndPoint != null)
             {
-                explicitEndPoint.BeforeTunnelConnectRequest -= OnBeforeTunnelConnectRequest;
+                //explicitEndPoint.BeforeTunnelConnectRequest -= OnBeforeTunnelConnectRequest;
             }
             if (proxyServer != null)
             {
@@ -182,7 +175,7 @@ namespace ProxyFramework
         private bool VerCertInfo()
         {
             string cpuId = HardwareManagement.GetCPUID();
-            string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "info.txt");
+            string file = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "proxy.info");
             string verStr = cpuId + ";" + file;
             if (!File.Exists(file))
             {
@@ -198,6 +191,7 @@ namespace ProxyFramework
             if (Md5(verStr) != oldStr)
             {
                 File.WriteAllText(file, Md5(verStr));
+                return false;
             }
             return true;
         }
@@ -219,33 +213,22 @@ namespace ProxyFramework
             return result;
         }
 
-        private async Task OnBeforeTunnelConnectRequest(object sender, TunnelConnectSessionEventArgs e)
-        {
-            string hostname = e.HttpClient.Request.RequestUri.Host;
-
-            //if (hostname.Contains("baidu.com"))
-            //{
-            //    // Exclude Https addresses you don't want to proxy
-            //    // Useful for clients that use certificate pinning
-            //    // for example dropbox.com
-            //    e.DecryptSsl = false;
-            //}
-        }
-
         private async Task OnRequest(object sender, SessionEventArgs e)
         {
-            string logStr = $"\n==================================================\nType:Request\nURL:{e.HttpClient.Request.Url}\nHeader:{e.HttpClient.Request.HeaderText}\nBody:{await e.GetResponseBodyAsString()}\n==================================================";
-            Log.Info(logStr);
+            if (IsEnableLog)
+            {
+                string logStr = $"\n==================================================\nType:Request\nURL:{e.HttpClient.Request.Url}\nHeader:{e.HttpClient.Request.HeaderText}\nBody:{await e.GetResponseBodyAsString()}\n==================================================";
+                Log.Info(logStr);
+            }
 
             if (Container.Count == 0)
-            {
                 return;
-            }
+
             List<IProxyFramework> proxies = Container.Get();
             foreach (var item in proxies)
             {
                 item.EventArgs = e;
-                if (item.Rule(e))
+                if (await item.Rule(e))
                 {
                     await item.Request();
                 }
@@ -255,18 +238,20 @@ namespace ProxyFramework
         // Modify response
         private async Task OnResponse(object sender, SessionEventArgs e)
         {
-            string logStr = $"\n==================================================\nType:Response\nURL:{e.HttpClient.Request.Url}\nHeader:{e.HttpClient.Request.HeaderText}\nBody:{await e.GetResponseBodyAsString()}\n==================================================";
-            Log.Info(logStr);
+            if (IsEnableLog)
+            {
+                string logStr = $"\n==================================================\nType:Response\nURL:{e.HttpClient.Request.Url}\nHeader:{e.HttpClient.Request.HeaderText}\nBody:{await e.GetResponseBodyAsString()}\n==================================================";
+                Log.Info(logStr);
+            }
 
             if (Container.Count == 0)
-            {
                 return;
-            }
+
             List<IProxyFramework> proxies = Container.Get();
             foreach (var item in proxies)
             {
                 item.EventArgs = e;
-                if (item.Rule(e))
+                if (await item.Rule(e))
                 {
                     await item.Response();
                 }

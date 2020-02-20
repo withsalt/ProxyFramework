@@ -10,7 +10,7 @@ namespace ProxyFramework
     {
         public SessionEventArgs EventArgs { get; set; }
 
-        public abstract bool Rule(SessionEventArgs e);
+        public abstract Task<bool> Rule(SessionEventArgs e);
 
         public virtual Task Request()
         {

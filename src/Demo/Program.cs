@@ -1,4 +1,5 @@
-﻿using Demo.QXClub;
+﻿using Demo.Baidu;
+using Demo.QXClub;
 using ProxyFramework;
 using System;
 
@@ -12,6 +13,7 @@ namespace Demo
             Proxy proxy = new Proxy(9527);
             //注入
             proxy.Add(new QXClubProxy());
+            proxy.Add(new BaiduProxy());
             //启动
             proxy.Start();
 

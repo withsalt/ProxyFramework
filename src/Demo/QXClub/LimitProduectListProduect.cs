@@ -4,9 +4,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Titanium.Web.Proxy.EventArguments;
 
-namespace ProxyFramework.Factory.QXClub
+namespace Demo.QXClub
 {
-    class LimitProduectListProduect : IProduect
+    class LimitProduectListProduect
     {
         public async Task DoRequest(SessionEventArgs content)
         {

@@ -17,7 +17,7 @@ namespace ProxyFramework
                 {
                     if (logger == null)
                     {
-                        logger = LogManager.GetCurrentClassLogger();
+                        logger = LogManager.GetLogger("ProxyFramework");
                     }
                 }
             }
