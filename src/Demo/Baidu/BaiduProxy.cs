@@ -9,7 +9,7 @@ namespace Demo.Baidu
 {
 class BaiduProxy : IProxyFramework
 {
-    public override async Task<bool> Rule(SessionEventArgs e)
+    public override async Task<bool> Action(SessionEventArgs e)
     {
         string url = e.HttpClient.Request.Url.ToString().ToLower();
         if (url.Contains("baidu.com"))  //匹配到qxclub.cn

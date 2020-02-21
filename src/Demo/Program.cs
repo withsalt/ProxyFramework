@@ -19,12 +19,10 @@ namespace Demo
 
             while (true)
             {
-                ConsoleKeyInfo key = Console.ReadKey(true);
-                if (key.Key == ConsoleKey.Q)
+                if (Console.ReadKey(true).Key == ConsoleKey.Q)
                 {
                     Console.Write("确认退出代理工具吗？（y退出，任意键取消）");
-                    key = Console.ReadKey();
-                    if (key.Key == ConsoleKey.Y)
+                    if (Console.ReadKey().Key == ConsoleKey.Y)
                     {
                         proxy.Stop();
                         return;

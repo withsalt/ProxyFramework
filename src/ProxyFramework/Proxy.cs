@@ -228,7 +228,7 @@ namespace ProxyFramework
             foreach (var item in proxies)
             {
                 item.EventArgs = e;
-                if (await item.Rule(e))
+                if (await item.Action(e))
                 {
                     await item.Request();
                 }
@@ -251,7 +251,7 @@ namespace ProxyFramework
             foreach (var item in proxies)
             {
                 item.EventArgs = e;
-                if (await item.Rule(e))
+                if (await item.Action(e))
                 {
                     await item.Response();
                 }

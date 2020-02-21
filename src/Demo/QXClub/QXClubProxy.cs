@@ -9,7 +9,7 @@ namespace Demo.QXClub
 {
     public class QXClubProxy : IProxyFramework
     {
-        public override async Task<bool> Rule(SessionEventArgs e)
+        public override async Task<bool> Action(SessionEventArgs e)
         {
             string url = e.HttpClient.Request.Url.ToString().ToLower();
             if (url.Contains("qxclub.cn"))  //匹配到qxclub.cn
