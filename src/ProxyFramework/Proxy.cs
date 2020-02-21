@@ -92,7 +92,7 @@ namespace ProxyFramework
             {
                 if (IsEnableHttp)
                 {
-                    if (!httpService.Start())
+                    if (!httpService.Start(_httpPort))
                     {
                         Log.Error("Http服务启动失败。");
                         return false;

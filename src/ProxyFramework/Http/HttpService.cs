@@ -23,13 +23,13 @@ namespace ProxyFramework.Http
             }
         }
 
-        public bool Start()
+        public bool Start(uint port)
         {
             try
             {
                 _listener = new TcpListener();
                 _listener.Use<HttpMiddleware>().GlobalFilters.Add(new HttpGlobalFilter());
-                _listener.Start(new IPEndPoint(IPAddress.Any, 9528), 2048);
+                _listener.Start(new IPEndPoint(IPAddress.Any, port), 2048);
 
                 while (!_listener.IsListening)
                 {
