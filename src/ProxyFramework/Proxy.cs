@@ -1,7 +1,4 @@
-﻿using ProxyFramework.Http;
-using ProxyFramework.Models;
-using ProxyFramework.Utils;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -12,8 +9,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Titanium.Web.Proxy;
 using Titanium.Web.Proxy.EventArguments;
-using Titanium.Web.Proxy.Helpers;
 using Titanium.Web.Proxy.Models;
+using ProxyFramework.Http;
+using ProxyFramework.Models;
+using ProxyFramework.Utils;
 
 namespace ProxyFramework
 {
@@ -21,9 +20,9 @@ namespace ProxyFramework
     {
         private readonly ProxyServer proxyServer = new ProxyServer();
         private ExplicitProxyEndPoint explicitEndPoint = null;
-        private HttpService httpService = new HttpService();
-        private uint _port = 9527;
-        public uint _httpPort = 6066;
+        private readonly HttpService httpService = new HttpService();
+        private readonly uint _port = 9527;
+        private readonly uint _httpPort = 6066;
 
         /// <summary>
         /// 
