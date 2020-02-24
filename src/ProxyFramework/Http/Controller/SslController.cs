@@ -64,8 +64,17 @@ namespace ProxyFramework.Http.Controller
             try
             {
                 HttpAction aciton = this.CurrentContext.Action;
-                string file = Path.Combine("Pages", "Index.html");
-                string html = System.IO.File.ReadAllText(file, Encoding.UTF8);
+                string html = "<!DOCTYPE html>" +
+                                "<html>" +
+                                "	<head>" +
+                                "		<meta charset=\"utf-8\" />" +
+                                "		<title>证书下载</title>" +
+                                "	</head>" +
+                                "	<body>" +
+                                "		<p>Hello，This is proxy client certificate download page. Please click the below link to download.</p>" +
+                                "		<p><a href=\"/Ssl/Download\">点击下载</a></p>" +
+                                "	</body>" +
+                                "</html>";
                 return Content(html);
             }
             catch (Exception ex)
