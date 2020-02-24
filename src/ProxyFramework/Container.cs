@@ -51,5 +51,13 @@ namespace ProxyFramework
                 _proxys.Remove(proxy);
             }
         }
+
+        public static void Clear()
+        {
+            lock (locker)
+            {
+                _proxys.Clear();
+            }
+        }
     }
 }

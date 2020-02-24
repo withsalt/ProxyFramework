@@ -55,6 +55,10 @@ namespace ProxyFramework
         /// </summary>
         private bool IsEnableSystemProxy { get; set; } = false;
 
+        /// <summary>
+        /// 添加代理
+        /// </summary>
+        /// <param name="proxy"></param>
         public void Add(IProxyFramework proxy)
         {
             if (proxy == null)
@@ -64,6 +68,23 @@ namespace ProxyFramework
             Container.Add(proxy);
         }
 
+        /// <summary>
+        /// 移除代理
+        /// </summary>
+        /// <param name="proxy"></param>
+        public void Remove(IProxyFramework proxy)
+        {
+            if (proxy == null)
+            {
+                throw new Exception("Proxy can not null.");
+            }
+            Container.Remove(proxy);
+        }
+
+        /// <summary>
+        /// 当前代理信息
+        /// </summary>
+        /// <returns></returns>
         public ProxyInfo Info()
         {
             ProxyInfo info = new ProxyInfo()
@@ -86,6 +107,10 @@ namespace ProxyFramework
             return info;
         }
 
+        /// <summary>
+        /// 启动服务
+        /// </summary>
+        /// <returns></returns>
         public bool Start()
         {
             try
@@ -145,6 +170,10 @@ namespace ProxyFramework
             }
         }
 
+        /// <summary>
+        /// 停止服务
+        /// </summary>
+        /// <returns></returns>
         public bool Stop()
         {
             if (!httpService.Stop())
