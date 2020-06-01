@@ -7,21 +7,21 @@ using Titanium.Web.Proxy.EventArguments;
 
 namespace Demo.Baidu
 {
-class BaiduProxy : IProxyFramework
-{
-    public override async Task<bool> Action(SessionEventArgs e)
+    public class BaiduProxy : IProxyFramework
     {
-        string url = e.HttpClient.Request.Url.ToString().ToLower();
-        if (url.Contains("baidu.com"))  //匹配到qxclub.cn
+        public override async Task<bool> Action(SessionEventArgs e)
         {
-            return true;
+            string url = e.HttpClient.Request.Url;
+            if (url.Contains("baidu.com", StringComparison.OrdinalIgnoreCase))  //匹配到baidu.com
+            {
+                return true;
+            }
+            return false;
         }
-        return false;
-    }
 
-    public override async Task Response()
-    {
-        EventArgs.SetResponseBodyString("想百度一下？没门！！");
+        public override async Task Response()
+        {
+            EventArgs.SetResponseBodyString("想百度一下？没门！！");
+        }
     }
-}
 }
