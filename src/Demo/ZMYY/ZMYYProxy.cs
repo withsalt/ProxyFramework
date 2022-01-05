@@ -133,34 +133,36 @@ namespace Demo.ZMYY
         private void ProcessCustSubscribeDateDetail(string oldResponse)
         {
             //需要先解密
-            string decodeResponse = DecodeResponse(oldResponse);
+            string decodeResponse = DecodeResponse(oldResponse, out string token);
             if (string.IsNullOrEmpty(decodeResponse))
             {
                 return;
             }
-            CustSubscribeDateDetailResponseModel responseModel = JsonUtil.DeserializeStringToObject<CustSubscribeDateDetailResponseModel>(oldResponse);
-
+            CustSubscribeDateDetailResponseModel responseModel = JsonUtil.DeserializeStringToObject<CustSubscribeDateDetailResponseModel>(decodeResponse);
+            if (responseModel.status != 200)
+            {
+                return;
+            }
+            if (responseModel.list == null || !responseModel.list.Any())
+            {
+                return;
+            }
+            foreach (var item in responseModel.list)
+            {
+                item.qty = 100;
+            }
+            EventArgs.SetResponseBodyString(AesHelper.AesEncryptor(JsonUtil.SerializeToString(responseModel), token));
         }
 
         /// <summary>
-        /// 根据jwtToken  获取实体
+        /// 解密返回的数据
         /// </summary>
-        /// <param name="token">jwtToken</param>
+        /// <param name="oldResponse"></param>
+        /// <param name="token"></param>
         /// <returns></returns>
-        public static IDictionary<string, object> GetJwtDecode(string token)
+        private string DecodeResponse(string oldResponse, out string token)
         {
-            IJsonSerializer serializer = new JsonNetSerializer();
-            IDateTimeProvider provider = new UtcDateTimeProvider();
-            IJwtValidator validator = new JwtValidator(serializer, provider);
-            IBase64UrlEncoder urlEncoder = new JwtBase64UrlEncoder();
-            IJwtAlgorithm algorithm = new HMACSHA256Algorithm();
-            IJwtDecoder decoder = new JwtDecoder(serializer, validator, urlEncoder, algorithm);
-            var dicInfo = decoder.DecodeToObject(token);
-            return dicInfo;
-        }
-
-        private string DecodeResponse(string oldResponse)
-        {
+            token = string.Empty;
             var cookies = EventArgs.HttpClient.Request.Headers.GetHeaders("Cookie");
             if (cookies == null || cookies.Count == 0)
             {
@@ -202,8 +204,21 @@ namespace Demo.ZMYY
             {
                 return null;
             }
-            string decode =  AesHelper.AesDecryptor(oldResponse, key);
+            token = key;
+            string decode = AesHelper.AesDecryptor(oldResponse, key);
             return decode;
+
+            IDictionary<string, object> GetJwtDecode(string token)
+            {
+                IJsonSerializer serializer = new JsonNetSerializer();
+                IDateTimeProvider provider = new UtcDateTimeProvider();
+                IJwtValidator validator = new JwtValidator(serializer, provider);
+                IBase64UrlEncoder urlEncoder = new JwtBase64UrlEncoder();
+                IJwtAlgorithm algorithm = new HMACSHA256Algorithm();
+                IJwtDecoder decoder = new JwtDecoder(serializer, validator, urlEncoder, algorithm);
+                var dicInfo = decoder.DecodeToObject(token);
+                return dicInfo;
+            }
         }
     }
 }

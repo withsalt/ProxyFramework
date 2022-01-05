@@ -148,9 +148,7 @@ namespace ProxyFramework
 
                 if (IsEnableSystemProxy)
                 {
-                    // Only explicit proxies can be set as system proxy!
-                    proxyServer.SetAsSystemHttpProxy(explicitEndPoint);
-                    proxyServer.SetAsSystemHttpsProxy(explicitEndPoint);
+                    proxyServer.SetAsSystemProxy(explicitEndPoint,ProxyProtocolType.AllHttp);
                     Log.Info("系统代理已启动。");
                 }
 
@@ -158,7 +156,7 @@ namespace ProxyFramework
                 {
                     Thread.Sleep(10);
                 }
-                Log.Info("远程代理已启动。");
+                Log.Info($"远程代理已启动。请将远程设备http/https代理设置为：【当前设备IP:{_port}】");
 
                 return true;
             }

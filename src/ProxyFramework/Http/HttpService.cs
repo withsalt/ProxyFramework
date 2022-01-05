@@ -35,7 +35,7 @@ namespace ProxyFramework.Http
                 {
                     Thread.Sleep(10);
                 }
-                Log.Info($"HTTP服务已启动，可通过访问[IP地址:{port}/ssl]下载证书。");
+                Log.Info($"HTTP服务已启动，可通过访问【当前设备IP:{port}/ssl】下载证书。");
                 return true;
             }
             catch (Exception ex)
