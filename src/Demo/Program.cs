@@ -1,4 +1,5 @@
 ﻿using Demo.Baidu;
+using Demo.ZMYY;
 using ProxyFramework;
 using System;
 
@@ -9,9 +10,9 @@ namespace Demo
         static void Main(string[] args)
         {
             //初始化
-            Proxy proxy = new Proxy(9527);
+            Proxy proxy = new Proxy(9527, true, true, false);
             //注入
-            proxy.Add(new BaiduProxy());
+            proxy.Add(new ZMYYProxy());
             //启动
             proxy.Start();
 

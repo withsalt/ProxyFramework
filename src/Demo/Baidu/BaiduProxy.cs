@@ -9,14 +9,14 @@ namespace Demo.Baidu
 {
     public class BaiduProxy : IProxyFramework
     {
-        public override async Task<bool> Action(SessionEventArgs e)
+        public override Task<bool> Action(SessionEventArgs e)
         {
             string url = e.HttpClient.Request.Url;
             if (url.Contains("baidu.com", StringComparison.OrdinalIgnoreCase))  //匹配到baidu.com
             {
-                return true;
+                return Task.FromResult(true);
             }
-            return false;
+            return Task.FromResult(false);
         }
 
         public override async Task Response()
