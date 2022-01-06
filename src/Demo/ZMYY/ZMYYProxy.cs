@@ -101,6 +101,11 @@ namespace Demo.ZMYY
             }
         }
 
+        /// <summary>
+        /// 处理疫苗页面
+        /// </summary>
+        /// <param name="oldResponse"></param>
+        /// <returns></returns>
         private string ProcessCustomerProduct(string oldResponse)
         {
             SubscribeResponseModel responseModel = JsonUtil.DeserializeStringToObject<SubscribeResponseModel>(oldResponse);
@@ -129,6 +134,11 @@ namespace Demo.ZMYY
             return JsonUtil.SerializeToString(responseModel);
         }
 
+        /// <summary>
+        /// 处理预约页面
+        /// </summary>
+        /// <param name="oldResponse"></param>
+        /// <returns></returns>
         private string ProcessCustSubscribeDate(string oldResponse)
         {
             CustSubscribeDateResponseModel responseModel = JsonUtil.DeserializeStringToObject<CustSubscribeDateResponseModel>(oldResponse);
@@ -143,12 +153,7 @@ namespace Demo.ZMYY
             }
             if (!responseModel.list.Any())
             {
-                responseModel.list.Add(new SubscribeDateItemModel()
-                {
-                    date = DateTime.Now.ToString("yyyy-MM-dd"),
-                    enable = true
-                });
-                //return oldResponse;
+                return oldResponse;
             }
             foreach (var item in responseModel.list)
             {
@@ -157,6 +162,11 @@ namespace Demo.ZMYY
             return JsonUtil.SerializeToString(responseModel);
         }
 
+        /// <summary>
+        /// 处理疫苗剩余剂次
+        /// </summary>
+        /// <param name="oldResponse"></param>
+        /// <returns></returns>
         private string ProcessCustSubscribeDateDetail(string oldResponse)
         {
             //需要先解密
@@ -182,14 +192,14 @@ namespace Demo.ZMYY
             }
             if (!responseModel.list.Any())
             {
-                responseModel.list.Add(new CustSubscribeDateDetailItem()
-                {
-                    StartTime = DateTime.Now.ToString("yyyy-MM-dd 00:00:00"),
-                    EndTime = DateTime.Now.ToString("yyyy-MM-dd 23:59:59"),
-                    qty = 100,
-                    mxid = "111",
-                });
-                //return oldResponse;
+                //responseModel.list.Add(new CustSubscribeDateDetailItem()
+                //{
+                //    StartTime = DateTime.Now.ToString("yyyy-MM-dd 00:00:00"),
+                //    EndTime = DateTime.Now.ToString("yyyy-MM-dd 23:59:59"),
+                //    qty = 100,
+                //    mxid = "111",
+                //});
+                return oldResponse;
             }
             foreach (var item in responseModel.list)
             {
