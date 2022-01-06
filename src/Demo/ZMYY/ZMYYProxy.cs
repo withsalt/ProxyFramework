@@ -23,6 +23,7 @@ namespace Demo.ZMYY
         private readonly string _customerProductUrl = "https://cloud.cn2030.com/sc/wx/HandlerSubscribe.ashx?act=CustomerProduct";
         private readonly string _custSubscribeDateAll = "https://cloud.cn2030.com/sc/wx/HandlerSubscribe.ashx?act=GetCustSubscribeDateAll";
         private readonly string _custSubscribeDateDetail = "https://cloud.cn2030.com/sc/wx/HandlerSubscribe.ashx?act=GetCustSubscribeDateDetail";
+        private readonly string _userInfoUrl = "https://cloud.cn2030.com/sc/wx/HandlerSubscribe.ashx?act=User";
 
         public override Task<bool> Action(SessionEventArgs e)
         {
@@ -39,14 +40,18 @@ namespace Demo.ZMYY
             {
                 return Task.FromResult(true);
             }
+            if (url.Contains(_userInfoUrl, StringComparison.OrdinalIgnoreCase))
+            {
+                return Task.FromResult(true);
+            }
             return Task.FromResult(false);
         }
 
         public override async Task Response()
         {
+            string oldResponse = await EventArgs.GetResponseBodyAsString();
             try
             {
-                string oldResponse = await EventArgs.GetResponseBodyAsString();
                 if (string.IsNullOrWhiteSpace(oldResponse))
                 {
                     return;
@@ -82,11 +87,16 @@ namespace Demo.ZMYY
                     //处理疫苗剩余剂次
                     result = ProcessCustSubscribeDateDetail(oldResponse);
                 }
+                if (url.Contains(_userInfoUrl, StringComparison.OrdinalIgnoreCase))
+                {
+                    //获取用户信息
+                    result = ProcessUserInfo(oldResponse);
+                }
                 EventArgs.SetResponseBody(Encoding.UTF8.GetBytes(result));
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Log.Error($"错误：{ex.Message}，请求参数：{oldResponse}", ex);
                 return;
             }
         }
@@ -133,7 +143,12 @@ namespace Demo.ZMYY
             }
             if (!responseModel.list.Any())
             {
-                return oldResponse;
+                responseModel.list.Add(new SubscribeDateItemModel()
+                {
+                    date = DateTime.Now.ToString("yyyy-MM-dd"),
+                    enable = true
+                });
+                //return oldResponse;
             }
             foreach (var item in responseModel.list)
             {
@@ -145,7 +160,12 @@ namespace Demo.ZMYY
         private string ProcessCustSubscribeDateDetail(string oldResponse)
         {
             //需要先解密
-            string decodeResponse = DecodeResponse(oldResponse, out string token);
+            string decodeResponse = oldResponse;
+            string token = string.Empty;
+            if (!oldResponse.StartsWith('{'))
+            {
+                decodeResponse = DecodeResponse(oldResponse, out token);
+            }
             if (string.IsNullOrEmpty(decodeResponse))
             {
                 return oldResponse;
@@ -162,7 +182,14 @@ namespace Demo.ZMYY
             }
             if (!responseModel.list.Any())
             {
-                return oldResponse;
+                responseModel.list.Add(new CustSubscribeDateDetailItem()
+                {
+                    StartTime = DateTime.Now.ToString("yyyy-MM-dd 00:00:00"),
+                    EndTime = DateTime.Now.ToString("yyyy-MM-dd 23:59:59"),
+                    qty = 100,
+                    mxid = "111",
+                });
+                //return oldResponse;
             }
             foreach (var item in responseModel.list)
             {
@@ -170,6 +197,28 @@ namespace Demo.ZMYY
                 item.qty = 100;
             }
             return AesHelper.AesEncryptor(JsonUtil.SerializeToString(responseModel), token);
+        }
+
+        /// <summary>
+        /// 处理用户信息
+        /// </summary>
+        /// <param name="oldResponse"></param>
+        /// <returns></returns>
+        private string ProcessUserInfo(string oldResponse)
+        {
+            UserResponseModel responseModel = JsonUtil.DeserializeStringToObject<UserResponseModel>(oldResponse);
+            if (responseModel.status != 200)
+            {
+                return oldResponse;
+            }
+            if (CurrentUser.User == null
+                || CurrentUser.User.user == null
+                || CurrentUser.User.user.idcard != responseModel.user.idcard)
+            {
+                Log.Info($"用户信息已获取，当前登录用户：{responseModel.user.cname}");
+                CurrentUser.User = responseModel;
+            }
+            return oldResponse;
         }
 
         /// <summary>
@@ -237,6 +286,16 @@ namespace Demo.ZMYY
                 var dicInfo = decoder.DecodeToObject(token);
                 return dicInfo;
             }
+        }
+
+        /// <summary>
+        /// 如果获取到的疫苗剂次大于0，将开始自动化强秒任务
+        /// </summary>
+        /// <returns></returns>
+        private void StartAutoTask()
+        {
+
+            Console.WriteLine();
         }
     }
 }
