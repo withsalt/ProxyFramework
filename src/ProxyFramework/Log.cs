@@ -31,9 +31,9 @@ namespace ProxyFramework
         public static void Info(string message, Exception exception = null)
         {
             if (exception == null)
-                logger.Info(message);
+                logger.Info($"[{DateTime.Now}]{message}");
             else
-                logger.Info(exception, message);
+                logger.Info(exception, $"[{DateTime.Now}]{message}");
         }
 
         /// <summary>
@@ -44,9 +44,9 @@ namespace ProxyFramework
         public static void Warn(string message, Exception exception = null)
         {
             if (exception == null)
-                logger.Warn(message);
+                logger.Warn($"[{DateTime.Now}]{message}");
             else
-                logger.Warn(exception, message);
+                logger.Warn(exception, $"[{DateTime.Now}]{message}");
         }
 
         /// <summary>
@@ -57,9 +57,9 @@ namespace ProxyFramework
         public static void Error(string message, Exception exception = null)
         {
             if (exception == null)
-                logger.Error(message);
+                logger.Error($"[{DateTime.Now}]{message}");
             else
-                logger.Error(exception, message);
+                logger.Error(exception, $"[{DateTime.Now}]{message}");
         }
     }
 }
