@@ -13,6 +13,7 @@ using Titanium.Web.Proxy.Models;
 using ProxyFramework.Http;
 using ProxyFramework.Models;
 using ProxyFramework.Utils;
+using System.Collections.ObjectModel;
 
 namespace ProxyFramework
 {
@@ -250,7 +251,7 @@ namespace ProxyFramework
             if (Container.Count == 0)
                 return;
 
-            List<IProxyFramework> proxies = Container.Get();
+            ReadOnlyCollection<IProxyFramework> proxies = Container.Get();
             foreach (var item in proxies)
             {
                 item.EventArgs = e;
@@ -273,7 +274,7 @@ namespace ProxyFramework
             if (Container.Count == 0)
                 return;
 
-            List<IProxyFramework> proxies = Container.Get();
+            ReadOnlyCollection<IProxyFramework> proxies = Container.Get();
             foreach (var item in proxies)
             {
                 item.EventArgs = e;

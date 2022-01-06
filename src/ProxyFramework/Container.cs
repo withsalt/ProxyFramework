@@ -1,63 +1,51 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Text;
 
 namespace ProxyFramework
 {
     class Container
     {
-        private static List<IProxyFramework> _proxys = new List<IProxyFramework>();
-
-        private static readonly object locker = new object();
+        private static ConcurrentDictionary<int, IProxyFramework> _proxys = new ConcurrentDictionary<int, IProxyFramework>();
 
         public static int Count
         {
             get
             {
-                int length = 0;
-                lock (locker)
-                {
-                    length = _proxys.Count;
-                }
-                return length;
+                return _proxys.Count;
             }
         }
 
-        public static List<IProxyFramework> Get()
+        public static ReadOnlyCollection<IProxyFramework> Get()
         {
-            return _proxys;
+            ReadOnlyCollection<IProxyFramework> proxyFrameworks = new ReadOnlyCollection<IProxyFramework>(_proxys.Values.ToList());
+            return proxyFrameworks;
         }
 
-        public static void Add(IProxyFramework proxy)
+        public static bool Add(IProxyFramework proxy)
         {
-            if (_proxys.Contains(proxy))
+            if (_proxys.ContainsKey(proxy.GetHashCode()))
             {
-                return;
+                return true;
             }
-            lock (locker)
-            {
-                _proxys.Add(proxy);
-            }
+            return _proxys.TryAdd(proxy.GetHashCode(), proxy);
         }
 
-        public static void Remove(IProxyFramework proxy)
+        public static bool Remove(IProxyFramework proxy)
         {
-            if (_proxys.Contains(proxy))
+            if (!_proxys.ContainsKey(proxy.GetHashCode()))
             {
-                return;
+                return true;
             }
-            lock (locker)
-            {
-                _proxys.Remove(proxy);
-            }
+            return _proxys.TryRemove(proxy.GetHashCode(), out _);
         }
 
         public static void Clear()
         {
-            lock (locker)
-            {
-                _proxys.Clear();
-            }
+            _proxys.Clear();
         }
     }
 }
