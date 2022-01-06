@@ -15,6 +15,6 @@ namespace Demo.ZMYY.Models
         /// <summary>
         /// 
         /// </summary>
-        public List<SubscribeDateItemModel> list { get; set; }
+        public List<SubscribeDateItemModel> list { get; set; } = new List<SubscribeDateItemModel>();
     }
 }

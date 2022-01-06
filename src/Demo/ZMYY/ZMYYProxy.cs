@@ -66,21 +66,23 @@ namespace Demo.ZMYY
                     }
                 }
                 string url = EventArgs.HttpClient.Request.Url;
+                string result = string.Empty;
                 if (url.Contains(_customerProductUrl, StringComparison.OrdinalIgnoreCase))
                 {
                     //处理疫苗页面
-                    ProcessCustomerProduct(oldResponse);
+                    result = ProcessCustomerProduct(oldResponse);
                 }
                 if (url.Contains(_custSubscribeDateAll, StringComparison.OrdinalIgnoreCase))
                 {
                     //处理预约页面
-                    ProcessCustSubscribeDate(oldResponse);
+                    result = ProcessCustSubscribeDate(oldResponse);
                 }
                 if (url.Contains(_custSubscribeDateDetail, StringComparison.OrdinalIgnoreCase))
                 {
                     //处理疫苗剩余剂次
-                    ProcessCustSubscribeDateDetail(oldResponse);
+                    result = ProcessCustSubscribeDateDetail(oldResponse);
                 }
+                EventArgs.SetResponseBody(Encoding.UTF8.GetBytes(result));
             }
             catch (Exception ex)
             {
@@ -89,16 +91,21 @@ namespace Demo.ZMYY
             }
         }
 
-        private void ProcessCustomerProduct(string oldResponse)
+        private string ProcessCustomerProduct(string oldResponse)
         {
             SubscribeResponseModel responseModel = JsonUtil.DeserializeStringToObject<SubscribeResponseModel>(oldResponse);
             if (responseModel.status != 200)
             {
-                return;
+                return oldResponse;
             }
-            if (responseModel.list == null || !responseModel.list.Any())
+            if (responseModel.list == null)
             {
-                return;
+                responseModel.list = new List<ListItemModel>();
+                return JsonUtil.SerializeToString(responseModel);
+            }
+            if (!responseModel.list.Any())
+            {
+                return oldResponse;
             }
             foreach (var item in responseModel.list)
             {
@@ -109,49 +116,60 @@ namespace Demo.ZMYY
                     item.enable = true;
                 }
             }
-            EventArgs.SetResponseBodyString(JsonUtil.SerializeToString(responseModel));
+            return JsonUtil.SerializeToString(responseModel);
         }
 
-        private void ProcessCustSubscribeDate(string oldResponse)
+        private string ProcessCustSubscribeDate(string oldResponse)
         {
             CustSubscribeDateResponseModel responseModel = JsonUtil.DeserializeStringToObject<CustSubscribeDateResponseModel>(oldResponse);
             if (responseModel.status != 200)
             {
-                return;
+                return oldResponse;
             }
-            if (responseModel.list == null || !responseModel.list.Any())
+            if (responseModel.list == null)
             {
-                return;
+                responseModel.list = new List<SubscribeDateItemModel>();
+                return JsonUtil.SerializeToString(responseModel);
+            }
+            if (!responseModel.list.Any())
+            {
+                return oldResponse;
             }
             foreach (var item in responseModel.list)
             {
                 item.enable = true;
             }
-            EventArgs.SetResponseBodyString(JsonUtil.SerializeToString(responseModel));
+            return JsonUtil.SerializeToString(responseModel);
         }
 
-        private void ProcessCustSubscribeDateDetail(string oldResponse)
+        private string ProcessCustSubscribeDateDetail(string oldResponse)
         {
             //需要先解密
             string decodeResponse = DecodeResponse(oldResponse, out string token);
             if (string.IsNullOrEmpty(decodeResponse))
             {
-                return;
+                return oldResponse;
             }
             CustSubscribeDateDetailResponseModel responseModel = JsonUtil.DeserializeStringToObject<CustSubscribeDateDetailResponseModel>(decodeResponse);
             if (responseModel.status != 200)
             {
-                return;
+                return oldResponse;
             }
-            if (responseModel.list == null || !responseModel.list.Any())
+            if (responseModel.list == null)
             {
-                return;
+                responseModel.list = new List<CustSubscribeDateDetailItem>();
+                return JsonUtil.SerializeToString(responseModel);
+            }
+            if (!responseModel.list.Any())
+            {
+                return oldResponse;
             }
             foreach (var item in responseModel.list)
             {
+                //设置剂次为100
                 item.qty = 100;
             }
-            EventArgs.SetResponseBodyString(AesHelper.AesEncryptor(JsonUtil.SerializeToString(responseModel), token));
+            return AesHelper.AesEncryptor(JsonUtil.SerializeToString(responseModel), token);
         }
 
         /// <summary>
